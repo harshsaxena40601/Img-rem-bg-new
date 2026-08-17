@@ -12,4 +12,6 @@ The image-processing backend and browser frontend are deployed separately:
 
 **Why:** ONNX model files are intentionally not committed to source control, and Vercel is not an appropriate runtime for the OpenVINO process.
 
-**How to apply:** Keep Render-specific dependencies lightweight and separate from the research/CLI dependencies. Change `frontend/.env` for local/cloud use, use the same `VITE_API_URL` variable in Vercel, then restrict Render `CORS_ORIGINS` to the deployed frontend origin.
+**Why:** Render can locate `web_app.py` while still missing the pipeline modules under `src/` unless the Gunicorn process receives the same `PYTHONPATH=src` used locally.
+
+**How to apply:** Keep Render-specific dependencies lightweight and separate from the research/CLI dependencies. Change `frontend/.env` for local/cloud use, use the same `VITE_API_URL` variable in Vercel, keep `PYTHONPATH=src` in the Render start command, then restrict Render `CORS_ORIGINS` to the deployed frontend origin.
