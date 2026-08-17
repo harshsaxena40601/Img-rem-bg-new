@@ -1,0 +1,28 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Environment variables
+.env
+
+# Large model files
+*.pth
+*.pt
+*.onnx
+*.ckpt
+*.bin
+
+# Generated files
+output/
+outputs/
+generated/
+uploads/
+
+# IDE
+.vscode/
+.idea/

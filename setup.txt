@@ -1,0 +1,21 @@
+first set up venv
+venv start commmand -- .\.venv\Scripts\Activate.ps1
+install openvino
+verify it -- python -c "import openvino as ov; print('OpenVINO:', ov.__version__); print('Devices:', ov.Core().available_devices)"
+install pillow -- pip install pillow huggingface_hub
+verify it -- python -c "from PIL import Image; import huggingface_hub; print('Pillow OK'); print('Hugging Face Hub OK')"
+Download BiRefNet-lite --pip install torch torchvision transformers
+verify it --python -c "from transformers import AutoModelForImageSegmentation; model=AutoModelForImageSegmentation.from_pretrained('ZhengPeng7/BiRefNet_lite', trust_remote_code=True); print('Model loaded successfully')"
+download the model -- python -c "from huggingface_hub import hf_hub_download; p=hf_hub_download(repo_id='onnx-community/modnet-webnn', filename='onnx/model_fp16.onnx', local_dir='models'); print(p)"
+verify the model python -c "import openvino as ov; core=ov.Core(); model=core.read_model('models/onnx/model_fp16.onnx'); print('Model loaded'); print('Inputs:'); [print(x.any_name, x.partial_shape, x.element_type) for x in model.inputs]; print('Outputs:'); [print(x.any_name, x.partial_shape, x.element_type) for x in model.outputs]"
+model works bit image not fine tune 
+next compare the model 
+new model -- python -c "from huggingface_hub import hf_hub_download; p=hf_hub_download(repo_id='onnx-community/BiRefNet_lite-ONNX', filename='onnx/model_fp16.onnx', local_dir='models/birefnet_lite'); print(p)"
+first model working properly
+now i add the estimator which estimate the time 
+and add remover.py which remove the background
+improve the accuracy and timing by estimator
+now create a different folder for image generator
+download --pip install opencv-python
+then verify -- python -c "import cv2; from PIL import Image; print('OpenCV:', cv2.__version__); print('Pillow OK')"
+taking a new aproach first search the product obtain its information and photaos as well then create model with bag AutoModelForImageSegmentation
