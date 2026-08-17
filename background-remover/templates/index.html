@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Background Remover</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <div class="eyebrow"><span class="pulse"></span> OpenVINO · CPU ready</div>
+        <h1>Make the background disappear.</h1>
+        <p class="lede">
+          Upload a product or portrait image and the local MODNet model will
+          return a transparent PNG in seconds.
+        </p>
+        <div class="runtime-strip" aria-live="polite">
+          <span><span class="mini-dot"></span><strong id="device-summary">Detecting device…</strong></span>
+          <span id="estimate-summary">Calibrating local pipeline…</span>
+        </div>
+      </header>
+
+      <section class="workspace" aria-label="Background removal tool">
+        <div class="panel upload-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="kicker">01 / Upload</p>
+              <h2>Choose an image</h2>
+            </div>
+            <span class="format-note">JPG · PNG · WEBP · AVIF</span>
+          </div>
+
+          <label class="dropzone" id="dropzone" for="image-input">
+            <input id="image-input" type="file" name="image"
+                   accept=".jpg,.jpeg,.png,.webp,.avif,image/*">
+            <span class="upload-icon" aria-hidden="true">↑</span>
+            <strong id="file-title">Drop an image here</strong>
+            <span id="file-hint">or click to browse · max 20 MB</span>
+          </label>
+
+          <div class="selected-file" id="selected-file" hidden>
+            <span class="file-dot"></span>
+            <span id="selected-name"></span>
+            <span id="selected-size"></span>
+          </div>
+
+          <button class="primary-button" id="process-button" type="button" disabled>
+            <span id="button-label">Remove background</span>
+            <span class="button-arrow" aria-hidden="true">→</span>
+          </button>
+          <p class="status" id="status" role="status"></p>
+        </div>
+
+        <div class="panel result-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="kicker">02 / Result</p>
+              <h2>Transparent preview</h2>
+            </div>
+            <span class="result-badge" id="result-badge">Waiting</span>
+          </div>
+
+          <div class="preview" id="preview">
+            <div class="empty-state" id="empty-state">
+              <div class="checker-sample"></div>
+              <strong>Your result will appear here</strong>
+              <span>Upload an image to get started</span>
+            </div>
+            <img id="result-image" alt="Background removed result" hidden>
+          </div>
+
+          <div class="result-footer" id="result-footer" hidden>
+            <span><span class="success-dot"></span><span id="timing">Processed locally</span></span>
+            <a class="download-link" id="download-link" download>Download PNG <span>↓</span></a>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>Powered by the existing <code>background-remover/src</code> pipeline</span>
+        <a href="/health" target="_blank" rel="noreferrer">Check health ↗</a>
+      </footer>
+    </main>
+    <script>
+      const input = document.getElementById("image-input");
+      const dropzone = document.getElementById("dropzone");
+      const processButton = document.getElementById("process-button");
+      const fileTitle = document.getElementById("file-title");
+      const fileHint = document.getElementById("file-hint");
+      const selectedFile = document.getElementById("selected-file");
+      const selectedName = document.getElementById("selected-name");
+      const selectedSize = document.getElementById("selected-size");
+      const status = document.getElementById("status");
+      const buttonLabel = document.getElementById("button-label");
+      const resultBadge = document.getElementById("result-badge");
+      const resultImage = document.getElementById("result-image");
+      const emptyState = document.getElementById("empty-state");
+      const resultFooter = document.getElementById("result-footer");
+      const downloadLink = document.getElementById("download-link");
+      const timing = document.getElementById("timing");
+      let resultUrl = null;
+
+      function formatSize(bytes) {
+        return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+      }
+
+      function selectFile(file) {
+        if (!file) return;
+        input.files = (() => {
+          const transfer = new DataTransfer();
+          transfer.items.add(file);
+          return transfer.files;
+        })();
+        selectedName.textContent = file.name;
+        selectedSize.textContent = formatSize(file.size);
+        selectedFile.hidden = false;
+        fileTitle.textContent = "Image ready";
+        fileHint.textContent = "Click to choose a different file";
+        processButton.disabled = false;
+        status.textContent = "";
+        dropzone.classList.add("has-file");
+      }
+
+      input.addEventListener("change", () => selectFile(input.files[0]));
+      ["dragenter", "dragover"].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropzone.classList.add("is-dragging");
+        });
+      });
+      ["dragleave", "drop"].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropzone.classList.remove("is-dragging");
+        });
+      });
+      dropzone.addEventListener("drop", (event) => selectFile(event.dataTransfer.files[0]));
+
+      processButton.addEventListener("click", async () => {
+        const file = input.files[0];
+        if (!file) return;
+        const formData = new FormData();
+        formData.append("image", file);
+        processButton.disabled = true;
+        processButton.classList.add("loading");
+        buttonLabel.textContent = "Removing background…";
+        status.textContent = "Loading the model and processing your image.";
+        resultBadge.textContent = "Processing";
+        resultBadge.classList.add("working");
+
+        try {
+          const response = await fetch("/process", { method: "POST", body: formData });
+          if (!response.ok) {
+            const payload = await response.json().catch(() => ({}));
+            throw new Error(payload.error || "Could not process this image.");
+          }
+          const blob = await response.blob();
+          if (resultUrl) URL.revokeObjectURL(resultUrl);
+          resultUrl = URL.createObjectURL(blob);
+          resultImage.src = resultUrl;
+          resultImage.hidden = false;
+          emptyState.hidden = true;
+          resultFooter.hidden = false;
+          downloadLink.href = resultUrl;
+          downloadLink.download = `${file.name.replace(/\.[^/.]+$/, "")}_removed.png`;
+          const preprocess = response.headers.get("X-Preprocess-Time-Ms") || "—";
+          const inference = response.headers.get("X-Inference-Time-Ms") || "—";
+          const postprocess = response.headers.get("X-Postprocess-Time-Ms") || "—";
+          timing.textContent = `${response.headers.get("X-Total-Time-Ms") || "—"} ms total · inference ${inference} ms`;
+          resultBadge.textContent = "Ready";
+          resultBadge.classList.remove("working");
+          resultBadge.classList.add("ready");
+          status.textContent = "Done — your transparent PNG is ready.";
+        } catch (error) {
+          resultBadge.textContent = "Try again";
+          resultBadge.classList.remove("working");
+          status.textContent = error.message;
+          status.classList.add("error");
+        } finally {
+          processButton.disabled = false;
+          processButton.classList.remove("loading");
+          buttonLabel.textContent = "Remove background";
+        }
+      });
+
+      async function loadRuntimeStatus() {
+        try {
+          const response = await fetch("/health");
+          const runtime = await response.json();
+          const device = runtime.device_info?.devices?.[0];
+          document.getElementById("device-summary").textContent =
+            `${runtime.model?.toUpperCase() || "MODEL"} · ${device?.name || runtime.device || "CPU"}`;
+          const estimate = runtime.estimate?.estimated_per_image;
+          document.getElementById("estimate-summary").textContent = estimate
+            ? `Estimated per image: ${estimate.formatted}`
+            : (runtime.error || "Runtime unavailable");
+        } catch (_error) {
+          document.getElementById("estimate-summary").textContent = "Runtime status unavailable";
+        }
+      }
+      loadRuntimeStatus();
+    </script>
+  </body>
+</html>

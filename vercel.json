@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "buildCommand": "python3 frontend/build.py",
+  "outputDirectory": "frontend/dist",
+  "cleanUrls": true
+}

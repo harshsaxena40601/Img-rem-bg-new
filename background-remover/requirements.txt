@@ -1,0 +1,7 @@
+Flask>=3.1,<4
+flask-cors>=6,<7
+gunicorn>=23,<24
+huggingface-hub>=1.27,<2
+numpy>=2.4,<3
+openvino>=2026.3,<2027
+Pillow>=12.3,<13
