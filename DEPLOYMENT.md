@@ -24,7 +24,7 @@ If creating the service manually, use:
 ```text
 Root Directory: background-remover
 Build Command: pip install -r requirements.txt && python scripts/download_model.py
-Start Command: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 1 --timeout 180 web_app:app
+Start Command: PYTHONPATH=src gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 1 --timeout 180 web_app:app
 Health Check Path: /health
 ```
 

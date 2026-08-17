@@ -52,6 +52,8 @@ standalone frontend on Vercel. See `DEPLOYMENT.md` for the required build
 commands and environment variables. Render downloads the ignored MODNet model
 during its build; Vercel only serves the static files in `frontend/`. For local
 frontend switching, change the single `VITE_API_URL` value in `frontend/.env`.
+The Render Gunicorn command includes `PYTHONPATH=src` so the shared pipeline
+modules load correctly in production.
 
 ## User preferences
 
