@@ -39,9 +39,36 @@ instance wakes up and loads the OpenVINO model.
 
 ## 2. Deploy the frontend to Vercel
 
-Create a Vercel project from the same GitHub repository and keep the project
-root at the repository root. The included `vercel.json` configures the static
-frontend build.
+Create a Vercel project from the same GitHub repository. You can use either
+configuration:
+
+### Option A: repository root
+
+Keep the Vercel Root Directory at the repository root. The root `vercel.json`
+uses:
+
+```text
+Build Command: python3 frontend/build.py
+Output Directory: frontend/dist
+```
+
+### Option B: frontend directory
+
+Set the Vercel Root Directory to:
+
+```text
+frontend
+```
+
+The `frontend/vercel.json` file then uses:
+
+```text
+Build Command: python3 build.py
+Output Directory: dist
+```
+
+Do not use `python3 frontend/build.py` when the Root Directory is already
+`frontend`, or Vercel will look for `frontend/frontend/build.py`.
 
 Add this Vercel environment variable:
 
