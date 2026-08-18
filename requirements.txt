@@ -1,0 +1,2 @@
+-r background-remover/requirements.txt
+flask-cors

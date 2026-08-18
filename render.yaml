@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: background-remover-api
+    runtime: python
+    rootDir: background-remover
+    buildCommand: pip install -r requirements.txt && python scripts/download_model.py
+    startCommand: PYTHONPATH=src gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 1 --timeout 180 web_app:app
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
+      - key: CORS_ORIGINS
+        value: "*"

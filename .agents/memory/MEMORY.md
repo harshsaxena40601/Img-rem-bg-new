@@ -1,0 +1,2 @@
+- [Replit Python dependency resolution](replit-python-dependency-resolution.md) — generated PyTorch index overrides can break normal Hugging Face package installs.
+- [Render and Vercel split](render-vercel-deployment.md) — Render downloads ignored ONNX models at build time; Vercel builds a static frontend with VITE_API_URL.
