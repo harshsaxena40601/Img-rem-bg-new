@@ -18,4 +18,17 @@ improve the accuracy and timing by estimator
 now create a different folder for image generator
 download --pip install opencv-python
 then verify -- python -c "import cv2; from PIL import Image; print('OpenCV:', cv2.__version__); print('Pillow OK')"
-taking a new aproach first search the product obtain its information and photaos as well then create model with bag AutoModelForImageSegmentation
+taking a new aproach first search the product obtain its information and photaos as well then create model with bag 
+use cloudinary to store images nd use google lens to find images
+now i create product research by using google search and google lens, it use original image to collect all the data present in the internet and obtain it.
+pipeline.py is the main file it control/join the all file 
+for image verificaion we use clip, it visually check imaage and verify product which verify product on the basi of title
+pip install torch torchvision transformers pillow requests --- for image verification
+create collect_product_images.py -- which Take the top verified product candidates.
+a) Extract their product/source pages.
+b) Collect available product images.
+c) Download them into a folder.
+d) Group duplicates.
+e) Run image similarity to remove near-identical images.
+f) Create a clean image set for the bag.
+now install request --pip install requests

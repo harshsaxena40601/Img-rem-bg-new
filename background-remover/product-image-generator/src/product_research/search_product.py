@@ -1,71 +1,106 @@
 from pathlib import Path
-from PIL import Image
+import json
+import os
+
+from dotenv import load_dotenv
+from serpapi import GoogleSearch
 
 
-# Project root
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-# Product input folder
-PRODUCTS_DIR = PROJECT_ROOT / "input" / "products"
+load_dotenv(PROJECT_ROOT / ".env")
+
+OUTPUT_DIR = PROJECT_ROOT / "output" / "search_results"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def find_product_image():
-    """Find the first supported product image."""
+def search_google_lens(image_url):
+    """
+    Search a Cloudinary/public image URL using Google Lens.
+    """
 
-    supported_extensions = {
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".webp",
+    api_key = os.getenv("SERPAPI_KEY")
+
+    if not api_key:
+        raise ValueError("SERPAPI_KEY is missing from .env")
+
+    if not image_url:
+        raise ValueError("Image URL is required")
+
+    print("\nSearching Google Lens...")
+    print(f"Image URL: {image_url}")
+
+    params = {
+        "engine": "google_lens",
+        "url": image_url,
+        "api_key": api_key,
     }
 
-    images = [
-        file
-        for file in PRODUCTS_DIR.iterdir()
-        if file.suffix.lower() in supported_extensions
-    ]
+    search = GoogleSearch(params)
 
-    if not images:
-        print("ERROR: No product image found.")
-        return None
-
-    return images[0]
+    return search.get_dict()
 
 
-def analyze_image(image_path):
-    """Print basic information about the product image."""
+def save_results(results):
+    """
+    Save the complete Google Lens response.
+    """
 
-    with Image.open(image_path) as image:
-        width, height = image.size
-        image_format = image.format
+    output_path = OUTPUT_DIR / "raw_results.json"
 
-    file_size_mb = image_path.stat().st_size / (1024 * 1024)
+    with open(output_path, "w", encoding="utf-8") as file:
+        json.dump(
+            results,
+            file,
+            indent=4,
+            ensure_ascii=False
+        )
 
-    print("\n" + "=" * 50)
-    print("PRODUCT IMAGE DETECTED")
-    print("=" * 50)
+    print(f"\nResults saved:")
+    print(output_path)
 
-    print(f"\nFile:       {image_path.name}")
-    print(f"Path:       {image_path}")
-    print(f"Format:     {image_format}")
-    print(f"Dimensions: {width} x {height}")
-    print(f"File size:  {file_size_mb:.2f} MB")
+
+def search_product(image_url):
+    """
+    Main reusable function.
+
+    Input:
+        Public product image URL
+
+    Output:
+        Google Lens search results
+    """
+
+    results = search_google_lens(image_url)
+
+    save_results(results)
+
+    return results
 
 
 def main():
 
-    print("\n" + "=" * 50)
-    print("PRODUCT RESEARCH PIPELINE")
-    print("=" * 50)
+    print("\n" + "=" * 55)
+    print("PRODUCT VISUAL SEARCH")
+    print("=" * 55)
 
-    image_path = find_product_image()
+    image_url = input(
+        "\nPaste a public product image URL: "
+    ).strip()
 
-    if image_path is None:
+    if not image_url:
+        print("ERROR: No image URL provided.")
         return
 
-    analyze_image(image_path)
+    results = search_product(image_url)
 
-    print("\nProduct image is ready for visual search.")
+    visual_matches = results.get("visual_matches", [])
+
+    print("\n" + "=" * 55)
+    print("SEARCH COMPLETE")
+    print("=" * 55)
+
+    print(f"\nVisual matches found: {len(visual_matches)}")
 
 
 if __name__ == "__main__":
