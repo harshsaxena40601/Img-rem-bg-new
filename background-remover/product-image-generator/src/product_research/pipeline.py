@@ -1,110 +1,115 @@
-from upload_image import find_product_image, upload_product_image
+import json
+
+from image_analyzer import analyze_product_image
+from upload_image import (
+    find_product_image,
+    upload_product_image,
+)
 from search_product import search_product
 from extract_results import extract_product_identity
-from google_products import search_google_products, save_results
+from query_builder import build_product_query
+from google_products import (
+    search_google_products,
+    save_results,
+)
+from fast_filter import fast_filter
+from product_brain import main as run_product_brain
 
 
 def main():
+    print("\n" + "=" * 70)
+    print("PRODUCT RESEARCH PIPELINE")
+    print("=" * 70)
 
-    print("\n" + "=" * 60)
-    print("FULL PRODUCT RESEARCH PIPELINE")
-    print("=" * 60)
+    try:
+        # ==================================================
+        # STEP 1: AI IMAGE ANALYSIS
+        # ==================================================
+        print("\nSTEP 1: AI IMAGE ANALYSIS")
 
-    # STEP 1
-    print("\nSTEP 1: Finding product image...")
+        image_analysis = analyze_product_image()
+        print("\nImage analysis completed.")
 
-    image_path = find_product_image()
+        # ==================================================
+        # STEP 2: UPLOAD PRODUCT IMAGE
+        # ==================================================
+        print("\nSTEP 2: UPLOADING PRODUCT IMAGE")
 
-    print(f"Product found: {image_path.name}")
+        image_path = find_product_image()
+        upload_result = upload_product_image(image_path)
+        image_url = upload_result["secure_url"]
 
-    # STEP 2
-    print("\nSTEP 2: Uploading to Cloudinary...")
+        # ==================================================
+        # STEP 3: GOOGLE LENS SEARCH
+        # ==================================================
+        print("\nSTEP 3: GOOGLE LENS SEARCH")
 
-    upload_result = upload_product_image(image_path)
+        lens_results = search_product(image_url)
 
-    image_url = upload_result["secure_url"]
+        # ==================================================
+        # STEP 4: PRODUCT IDENTITY EXTRACTION
+        # ==================================================
+        print("\nSTEP 4: PRODUCT IDENTITY EXTRACTION")
 
-    print("\nCloudinary upload successful.")
-    print(f"Image URL: {image_url}")
+        identity = extract_product_identity(lens_results)
 
-    # STEP 3
-    print("\nSTEP 3: Searching Google Lens...")
+        # ==================================================
+        # STEP 5: AI + GOOGLE LENS QUERY BUILDER
+        # ==================================================
+        print("\nSTEP 5: BUILDING PRODUCT SEARCH QUERY")
 
-    lens_results = search_product(image_url)
+        query_result = build_product_query()
+        query = query_result["final_query"]
 
-    visual_matches = lens_results.get(
-        "visual_matches",
-        []
-    )
+        print(f"\nFinal search query:\n{query}")
 
-    print(
-        f"\nVisual matches found: "
-        f"{len(visual_matches)}"
-    )
+        # ==================================================
+        # STEP 6: GOOGLE SHOPPING SEARCH
+        # ==================================================
+        print("\nSTEP 6: GOOGLE SHOPPING SEARCH")
 
-    # STEP 4
-    print("\nSTEP 4: Identifying product...")
+        shopping_results = search_google_products(query)
+        save_results(shopping_results)
 
-    identity = extract_product_identity(
-        lens_results
-    )
+        # ==================================================
+        # STEP 7: FAST VISUAL FILTER
+        # ==================================================
+        print("\nSTEP 7: FAST VISUAL FILTER")
 
-    query = identity["suggested_query"]
+        fast_filter()
 
-    print(f"\nIdentified query: {query}")
-    print(
-        f"Confidence: "
-        f"{identity['confidence']}"
-    )
+        # ==================================================
+        # STEP 8: PRODUCT BRAIN
+        # ==================================================
+        print("\nSTEP 8: PRODUCT BRAIN")
 
-    # STEP 5
-    print("\nSTEP 5: Searching Google Shopping...")
+        final_result = run_product_brain()
 
-    shopping_results = search_google_products(
-        query
-    )
+        # ==================================================
+        # PIPELINE COMPLETE
+        # ==================================================
+        print("\n" + "=" * 70)
+        print("PIPELINE COMPLETE")
+        print("=" * 70)
 
-    save_results(shopping_results)
+        if final_result:
+            print(
+                json.dumps(
+                    final_result,
+                    indent=4,
+                    ensure_ascii=False,
+                )
+            )
 
-    products = shopping_results.get(
-        "shopping_results",
-        []
-    )
+    except Exception as error:
+        print("\n" + "=" * 70)
+        print("PIPELINE FAILED")
+        print("=" * 70)
 
-    # FINAL SUMMARY
-    print("\n" + "=" * 60)
-    print("PIPELINE COMPLETE")
-    print("=" * 60)
-
-    print(f"\nProduct image: {image_path.name}")
-    print(f"Cloudinary URL: {image_url}")
-
-    print(
-        f"Visual matches: "
-        f"{len(visual_matches)}"
-    )
-
-    print(f"Product query: {query}")
-
-    print(
-        f"Identification confidence: "
-        f"{identity['confidence']}"
-    )
-
-    print(
-        f"Shopping products found: "
-        f"{len(products)}"
-    )
-
-    print("\nTop 5 shopping results:")
-
-    for index, product in enumerate(
-        products[:5],
-        start=1
-    ):
-        print(f"\n{index}. {product.get('title')}")
-        print(f"   Source: {product.get('source')}")
-        print(f"   Price: {product.get('price')}")
+        print(
+            f"\n{type(error).__name__}: "
+            f"{error}"
+        )
 
 
 if __name__ == "__main__":
