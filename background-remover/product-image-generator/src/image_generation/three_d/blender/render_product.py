@@ -305,21 +305,16 @@ def setup_render_settings():
 
     scene.render.engine = "BLENDER_EEVEE"
 
-    scene.render.resolution_x = (
-        RENDER_WIDTH
-    )
-
-    scene.render.resolution_y = (
-        RENDER_HEIGHT
-    )
-
+    scene.render.resolution_x = 1024
+    scene.render.resolution_y = 1024
     scene.render.resolution_percentage = 100
 
-    scene.render.image_settings.file_format = (
-        "PNG"
-    )
+    scene.render.image_settings.file_format = "PNG"
 
     scene.render.film_transparent = False
+
+    # Required for headless rendering
+    scene.render.use_file_extension = True
 
 
 # ============================================================
@@ -366,7 +361,8 @@ def render_view(
     )
 
     bpy.ops.render.render(
-        write_still=True
+        animation=False,
+        write_still=True,
     )
 
     print(
