@@ -35,3 +35,4 @@ now install request --pip install requests
 now use a brain as well right now i use gemini for find final product 
 right now i use 2 ai for finding the best product, but groq doesnt work well so i m using only gemini right now
 i made ai central so i can change them whenever i want
+to run pipeline --python .\src\product_research\pipeline.py

@@ -1,0 +1,32 @@
+{
+	"product": {
+		"name": "Dummy Handbag",
+		"category": "handbag"
+	},
+	"dimensions": {
+		"width": 3.0,
+		"height": 2.0,
+		"depth": 0.8
+	},
+	"body": {
+		"shape": "rounded_box",
+		"corner_radius": 0.15
+	},
+	"handle": {
+		"enabled": true,
+		"width": 1.8,
+		"height": 1.0,
+		"thickness": 0.12
+	},
+	"material": {
+		"name": "Leather",
+		"color": [
+			0.35,
+			0.08,
+			0.03,
+			1.0
+		],
+		"metallic": 0.0,
+		"roughness": 0.38
+	}
+}

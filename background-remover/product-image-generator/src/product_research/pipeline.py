@@ -14,6 +14,7 @@ from google_products import (
 )
 from fast_filter import fast_filter
 from product_brain import main as run_product_brain
+from product_link_resolver import resolve_product_link
 
 
 def main():
@@ -85,6 +86,23 @@ def main():
 
         final_result = run_product_brain()
 
+        if not final_result:
+            raise ValueError(
+                "Product Brain did not return a final result."
+            )
+
+        if final_result.get("decision") != "MATCH":
+            raise ValueError(
+                "No confirmed product match found."
+            )
+
+        # ==================================================
+        # STEP 9: PRODUCT LINK RESOLVER
+        # ==================================================
+        print("\nSTEP 9: RESOLVING REAL PRODUCT LINK")
+
+        link_result = resolve_product_link()
+
         # ==================================================
         # PIPELINE COMPLETE
         # ==================================================
@@ -93,9 +111,20 @@ def main():
         print("=" * 70)
 
         if final_result:
+            print("\nFINAL PRODUCT MATCH:")
             print(
                 json.dumps(
                     final_result,
+                    indent=4,
+                    ensure_ascii=False,
+                )
+            )
+
+        if link_result:
+            print("\nPRODUCT LINK RESULT:")
+            print(
+                json.dumps(
+                    link_result,
                     indent=4,
                     ensure_ascii=False,
                 )

@@ -1,7 +1,7 @@
 from pathlib import Path
 import json
-import requests
 from io import BytesIO
+import requests
 
 import torch
 from PIL import Image
@@ -124,11 +124,22 @@ def fast_filter():
             print(f"Visual similarity: {score}%")
 
             results.append({
-                "position": index,
+                "position": product.get("position", index),
                 "title": title,
                 "source": product.get("source"),
                 "price": product.get("price"),
                 "thumbnail": thumbnail_url,
+                "product_link": (
+                    product.get("product_link")
+                    or product.get("link")
+                ),
+                "product_id": product.get("product_id"),
+                "immersive_product_page_token": product.get(
+                    "immersive_product_page_token"
+                ),
+                "serpapi_immersive_product_api": product.get(
+                    "serpapi_immersive_product_api"
+                ),
                 "visual_similarity": score,
             })
 
@@ -145,7 +156,6 @@ def fast_filter():
         "candidates": top_candidates,
     }
 
-    # Ensure output directory exists before saving
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as file:

@@ -410,7 +410,20 @@ def save_final_result(result, candidates):
         and isinstance(candidate_number, int)
         and 1 <= candidate_number <= len(candidates)
     ):
-        result["matched_product"] = candidates[candidate_number - 1]
+        candidate = candidates[candidate_number - 1]
+        result["matched_product"] = {
+            "position": candidate.get("position"),
+            "title": candidate.get("title"),
+            "source": candidate.get("source"),
+            "price": candidate.get("price"),
+            "thumbnail": candidate.get("thumbnail"),
+            "product_link": candidate.get("product_link"),
+            "product_id": candidate.get("product_id"),
+            "immersive_product_page_token": candidate.get(
+                "immersive_product_page_token"
+            ),
+            "visual_similarity": candidate.get("visual_similarity"),
+        }
     else:
         result["matched_product"] = None
 

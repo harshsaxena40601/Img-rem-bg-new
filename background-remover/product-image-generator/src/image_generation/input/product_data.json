@@ -1,0 +1,36 @@
+{
+	"product_name": "Large Woven Leather Tote Bag",
+	"category": "handbag",
+	"brand": "Unknown",
+	"description": "Large woven leather tote bag with a rectangular shape, burgundy brown leather exterior, braided shoulder strap, top handles, gold metal knot detail and dark leather interior.",
+	"material": {
+		"primary": "Leather",
+		"texture": "Woven intrecciato style"
+	},
+	"color": {
+		"primary": "Dark burgundy brown",
+		"secondary": "Dark brown",
+		"hardware": "Gold"
+	},
+	"shape": {
+		"type": "Rectangular tote",
+		"structure": "Soft structured",
+		"proportions": "Wide and horizontally oriented"
+	},
+	"features": [
+		"Woven leather exterior",
+		"Two top handles",
+		"Braided shoulder strap",
+		"Gold metal knot detail",
+		"Dark interior",
+		"Interior zip pocket"
+	],
+	"generation_goal": {
+		"type": "3D product representation",
+		"preserve_product_identity": true,
+		"preserve_material": true,
+		"preserve_color": true,
+		"preserve_shape": true,
+		"require_multiple_angles": true
+	}
+}
