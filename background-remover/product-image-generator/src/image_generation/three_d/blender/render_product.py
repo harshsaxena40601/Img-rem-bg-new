@@ -56,7 +56,6 @@ def clear_scene():
     """
     Remove everything from the default Blender scene.
     """
-
     bpy.ops.object.select_all(
         action="SELECT"
     )
@@ -71,14 +70,12 @@ def clear_scene():
 # ============================================================
 
 def get_model_path():
-
     model_path = (
         MODEL_DIR
         / MODEL_FILE_NAME
     )
 
     if not model_path.exists():
-
         raise FileNotFoundError(
             "\n3D model not found:\n"
             f"{model_path}\n\n"
@@ -94,7 +91,6 @@ def get_model_path():
 # ============================================================
 
 def import_model(model_path):
-
     print("\nImporting 3D model...")
 
     bpy.ops.import_scene.gltf(
@@ -106,7 +102,6 @@ def import_model(model_path):
     )
 
     if not imported_objects:
-
         raise RuntimeError(
             "No objects were imported "
             "from the GLB file."
@@ -125,7 +120,6 @@ def import_model(model_path):
 # ============================================================
 
 def center_model(objects):
-
     print("\nCentering model...")
 
     mesh_objects = [
@@ -135,7 +129,6 @@ def center_model(objects):
     ]
 
     if not mesh_objects:
-
         raise RuntimeError(
             "No mesh objects found."
         )
@@ -145,7 +138,6 @@ def center_model(objects):
     )
 
     for obj in mesh_objects:
-
         obj.select_set(True)
 
     bpy.context.view_layer.objects.active = (
@@ -157,16 +149,7 @@ def center_model(objects):
         center="BOUNDS"
     )
 
-    # Calculate combined bounding box.
-    min_x = min(
-        obj.matrix_world @
-        min(obj.bound_box, key=lambda v: v[0])
-        for obj in mesh_objects
-    )
-
-    # Simpler reliable centering:
     # Create an empty parent for all imported objects.
-
     bpy.ops.object.empty_add(
         type="PLAIN_AXES",
         location=(0, 0, 0)
@@ -176,7 +159,6 @@ def center_model(objects):
     root.name = "PRODUCT_ROOT"
 
     for obj in objects:
-
         obj.parent = root
 
     # Calculate approximate center
@@ -186,7 +168,6 @@ def center_model(objects):
     ]
 
     if locations:
-
         center_x = sum(
             loc.x for loc in locations
         ) / len(locations)
@@ -215,7 +196,6 @@ def center_model(objects):
 # ============================================================
 
 def create_camera():
-
     print("\nCreating camera...")
 
     bpy.ops.object.camera_add(
@@ -223,9 +203,7 @@ def create_camera():
     )
 
     camera = bpy.context.active_object
-
     camera.name = "PRODUCT_CAMERA"
-
     bpy.context.scene.camera = camera
 
     return camera
@@ -239,7 +217,6 @@ def point_camera_at(
     camera,
     target=(0, 0, 0)
 ):
-
     direction = (
         mathutils.Vector(target)
         - camera.location
@@ -263,27 +240,21 @@ def add_area_light(
     energy,
     size
 ):
-
     bpy.ops.object.light_add(
         type="AREA",
         location=location
     )
 
     light = bpy.context.active_object
-
     light.name = name
-
     light.data.energy = energy
-
     light.data.shape = "DISK"
-
     light.data.size = size
 
     return light
 
 
 def setup_lighting():
-
     print("\nSetting up studio lighting...")
 
     add_area_light(
@@ -315,11 +286,9 @@ def setup_lighting():
 # ============================================================
 
 def setup_world():
-
     world = bpy.context.scene.world
 
     if world:
-
         world.color = (
             0.05,
             0.05,
@@ -332,7 +301,6 @@ def setup_world():
 # ============================================================
 
 def setup_render_settings():
-
     scene = bpy.context.scene
 
     scene.render.engine = "BLENDER_EEVEE_NEXT"
@@ -363,7 +331,6 @@ def render_view(
     name,
     location
 ):
-
     print(
         f"\nRendering: {name}"
     )
@@ -416,7 +383,6 @@ def render_view(
 # ============================================================
 
 def save_result(data):
-
     OUTPUT_DIR.mkdir(
         parents=True,
         exist_ok=True
@@ -427,7 +393,6 @@ def save_result(data):
         "w",
         encoding="utf-8"
     ) as file:
-
         json.dump(
             data,
             file,
@@ -441,7 +406,6 @@ def save_result(data):
 # ============================================================
 
 def render_product():
-
     print("\n" + "=" * 60)
     print("BLENDER PRODUCT RENDERING")
     print("=" * 60)
@@ -498,23 +462,17 @@ def render_product():
     )
 
     result = {
-
         "success": True,
-
         "model_file": str(
             model_path.resolve()
         ),
-
         "render_engine": (
             "BLENDER_EEVEE_NEXT"
         ),
-
         "renders": renders,
-
         "total_renders": len(
             renders
         )
-
     }
 
     save_result(result)
@@ -524,7 +482,6 @@ def render_product():
     print("=" * 60)
 
     for render in renders:
-
         print(render)
 
     print(
@@ -533,5 +490,4 @@ def render_product():
 
 
 if __name__ == "__main__":
-
     render_product()
