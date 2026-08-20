@@ -303,7 +303,7 @@ def setup_world():
 def setup_render_settings():
     scene = bpy.context.scene
 
-    scene.render.engine = "BLENDER_EEVEE_NEXT"
+    scene.render.engine = "BLENDER_EEVEE"
 
     scene.render.resolution_x = (
         RENDER_WIDTH
@@ -467,7 +467,7 @@ def render_product():
             model_path.resolve()
         ),
         "render_engine": (
-            "BLENDER_EEVEE_NEXT"
+            "BLENDER_EEVEE"
         ),
         "renders": renders,
         "total_renders": len(
